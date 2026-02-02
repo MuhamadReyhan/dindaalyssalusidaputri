@@ -1,221 +1,133 @@
-// =====================
-// CONFIG (EDIT DI SINI)
-// =====================
-const CONFIG = {
-  name: "Dinda Alyssa Lusida Putri",
-  subtitle: "Aku bersyukur kamu ada. Semoga tahun ini kamu makin bahagia, sehat, dan dikelilingi hal baik.",
-  // Ulang tahun (hari & bulan). Script akan otomatis pilih "ulang tahun berikutnya"
-  birthdayDay: 20,
-  birthdayMonth: 8, // 1=Jan, 2=Feb, ... 12=Des
-  secretMessage:
-    "Kamu itu spesial. Terima kasih sudah jadi orang yang menginspirasi. Semoga semua impianmu pelan-pelan jadi nyata ✨",
-  surpriseMessage:
-    "Hari ini milikmu! Semoga langkahmu makin ringan, hatimu makin tenang, dan senyummu makin sering muncul 😄",
-  // Galeri: bisa URL (https://...) atau file lokal di assets/
-  photos: [
-    "assets/foto1.jpg",
-    "assets/foto2.jpg",
-    "assets/foto3.jpg",
-    "assets/foto4.jpg",
-    "assets/foto5.jpg",
-    "assets/foto6.jpg",
-  ],
-  // Musik: file mp3 lokal (disarankan) atau URL mp3
-  musicSrc: "assets/song.mp3",
+// Website Ucapan Ulang Tahun
+// Untuk: DINDA ALYSSA LUSIDA PUTRI
+// Lahir: 20 Februari 2005
+
+const BIRTH = {
+  day: 20,
+  month: 2, // 1-12
+  year: 2005
 };
 
-// =====================
-// SETUP TEXT
-// =====================
 const $ = (id) => document.getElementById(id);
 
-$("personName").textContent = CONFIG.name;
-$("subtitleText").textContent = CONFIG.subtitle;
-$("secretText").textContent = CONFIG.secretMessage;
-$("surpriseText").textContent = CONFIG.surpriseMessage;
-
-// =====================
-// GALLERY
-// =====================
-const galleryEl = $("gallery");
-const lightbox = $("lightbox");
-const lightboxImg = $("lightboxImg");
-
-function buildGallery() {
-  galleryEl.innerHTML = "";
-  CONFIG.photos.forEach((src, idx) => {
-    const img = document.createElement("img");
-    img.src = src;
-    img.alt = `Foto ${idx + 1}`;
-    img.loading = "lazy";
-    img.addEventListener("click", () => openLightbox(src, img.alt));
-    galleryEl.appendChild(img);
-  });
+function pad2(n) {
+  return String(n).padStart(2, "0");
 }
 
-function openLightbox(src, alt) {
-  lightboxImg.src = src;
-  lightboxImg.alt = alt;
-  lightbox.hidden = false;
-  document.body.style.overflow = "hidden";
-}
-
-function closeLightbox() {
-  lightbox.hidden = true;
-  lightboxImg.src = "";
-  document.body.style.overflow = "";
-}
-
-$("closeLightbox").addEventListener("click", closeLightbox);
-lightbox.addEventListener("click", (e) => {
-  if (e.target === lightbox) closeLightbox();
-});
-document.addEventListener("keydown", (e) => {
-  if (!lightbox.hidden && e.key === "Escape") closeLightbox();
-});
-
-buildGallery();
-
-// =====================
-// MUSIC
-// =====================
-const audio = $("bgMusic");
-audio.volume = 0.75;
-audio.querySelector("source").src = CONFIG.musicSrc;
-audio.load();
-
-let isPlaying = false;
-$("playBtn").addEventListener("click", async () => {
-  try {
-    if (!isPlaying) {
-      await audio.play();
-      isPlaying = true;
-      $("playBtn").textContent = "⏸️ Pause Musik";
-    } else {
-      audio.pause();
-      isPlaying = false;
-      $("playBtn").textContent = "▶️ Putar Musik";
-    }
-  } catch (err) {
-    alert("Browser memblokir autoplay. Coba klik tombol musik sekali lagi ya 🙂");
-  }
-});
-
-// =====================
-// SECRET MESSAGE
-// =====================
-$("revealBtn").addEventListener("click", () => {
-  $("secretBox").hidden = false;
-  $("revealBtn").disabled = true;
-  $("revealBtn").textContent = "Terbuka ✅";
-});
-
-// =====================
-// COUNTDOWN
-// =====================
-function getNextBirthdayDate(day, month) {
-  // month: 1-12
+function nextBirthdayDate() {
   const now = new Date();
-  const year = now.getFullYear();
-  const targetThisYear = new Date(year, month - 1, day, 0, 0, 0);
+  const y = now.getFullYear();
+  const thisYear = new Date(y, BIRTH.month - 1, BIRTH.day, 0, 0, 0);
 
-  // Jika sudah lewat hari ini, ambil tahun depan
-  if (targetThisYear.getTime() <= now.getTime()) {
-    return new Date(year + 1, month - 1, day, 0, 0, 0);
+  // kalau hari ini sudah lewat (atau tepat), pakai tahun depan
+  if (thisYear.getTime() <= now.getTime()) {
+    return new Date(y + 1, BIRTH.month - 1, BIRTH.day, 0, 0, 0);
   }
-  return targetThisYear;
+  return thisYear;
 }
 
-let targetDate = getNextBirthdayDate(CONFIG.birthdayDay, CONFIG.birthdayMonth);
+function currentAge() {
+  const now = new Date();
+  let age = now.getFullYear() - BIRTH.year;
 
-function pad2(n) { return String(n).padStart(2, "0"); }
+  const bThisYear = new Date(now.getFullYear(), BIRTH.month - 1, BIRTH.day, 0, 0, 0);
+  if (now.getTime() < bThisYear.getTime()) age -= 1;
+  return age;
+}
+
+function formatIndoDate(d) {
+  return d.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+}
+
+// ========== COUNTDOWN ==========
+let target = nextBirthdayDate();
 
 function tick() {
   const now = new Date();
-  let diff = targetDate.getTime() - now.getTime();
+  let diff = target.getTime() - now.getTime();
 
   if (diff <= 0) {
     // tepat ulang tahun
-    $("dd").textContent = "00";
-    $("hh").textContent = "00";
-    $("mm").textContent = "00";
-    $("ss").textContent = "00";
-    $("targetHint").textContent = "Hari ini ulang tahunnya! 🎉🎂";
-    burstConfetti(140);
+    ["dd","hh","mm","ss"].forEach(id => { const el = $(id); if (el) el.textContent = "00"; });
+    const t = $("targetText");
+    if (t) t.textContent = "Hari ini ulang tahunnya! 🎉🎂";
     return;
   }
 
-  const sec = Math.floor(diff / 1000);
-  const days = Math.floor(sec / (3600 * 24));
-  const hours = Math.floor((sec % (3600 * 24)) / 3600);
-  const mins = Math.floor((sec % 3600) / 60);
-  const secs = sec % 60;
+  const totalSec = Math.floor(diff / 1000);
+  const days = Math.floor(totalSec / (3600 * 24));
+  const hours = Math.floor((totalSec % (3600 * 24)) / 3600);
+  const mins = Math.floor((totalSec % 3600) / 60);
+  const secs = totalSec % 60;
 
-  $("dd").textContent = pad2(days);
-  $("hh").textContent = pad2(hours);
-  $("mm").textContent = pad2(mins);
-  $("ss").textContent = pad2(secs);
+  const dd = $("dd"), hh = $("hh"), mm = $("mm"), ss = $("ss");
+  if (dd) dd.textContent = pad2(days);
+  if (hh) hh.textContent = pad2(hours);
+  if (mm) mm.textContent = pad2(mins);
+  if (ss) ss.textContent = pad2(secs);
 
-  const options = { year: "numeric", month: "long", day: "numeric" };
-  $("targetHint").textContent = `Menuju: ${targetDate.toLocaleDateString("id-ID", options)} (00:00)`;
+  const t = $("targetText");
+  if (t) t.textContent = `Menuju: ${formatIndoDate(target)} (00:00)`;
 }
+
+const ageEl = $("ageNow");
+if (ageEl) ageEl.textContent = `${currentAge()} tahun`;
 
 tick();
 setInterval(tick, 1000);
 
+// ========== MUSIC ==========
+const audio = $("bgMusic");
+const btn = $("musicBtn");
+let playing = false;
 
+if (audio && btn) {
+  audio.volume = 0.8;
 
-// Simple confetti (tanpa library)
-const canvas = $("confettiCanvas");
-const ctx = canvas.getContext("2d");
-let W, H;
-function resize() {
-  W = canvas.width = window.innerWidth * devicePixelRatio;
-  H = canvas.height = window.innerHeight * devicePixelRatio;
-}
-window.addEventListener("resize", resize);
-resize();
-
-let pieces = [];
-function rand(min, max) { return Math.random() * (max - min) + min; }
-
-function burstConfetti(count = 120) {
-  for (let i = 0; i < count; i++) {
-    pieces.push({
-      x: rand(0, W),
-      y: rand(-H * 0.2, 0),
-      vx: rand(-1.5, 1.5) * devicePixelRatio,
-      vy: rand(2.2, 5.5) * devicePixelRatio,
-      size: rand(6, 14) * devicePixelRatio,
-      rot: rand(0, Math.PI * 2),
-      vr: rand(-0.12, 0.12),
-      // warna random (tanpa palette fixed)
-      color: `hsl(${Math.floor(rand(0, 360))} 90% 65%)`,
-      life: rand(80, 160),
-    });
-  }
+  btn.addEventListener("click", async () => {
+    try {
+      if (!playing) {
+        await audio.play();
+        playing = true;
+        btn.textContent = "⏸️ Pause Musik";
+      } else {
+        audio.pause();
+        playing = false;
+        btn.textContent = "▶️ Putar Musik";
+      }
+    } catch (e) {
+      alert("Musik belum bisa diputar. Pastikan file ada di assets/song.mp3 lalu coba lagi ya.");
+    }
+  });
 }
 
-function animate() {
-  ctx.clearRect(0, 0, W, H);
+// ========== CONFETTI (ringan, tanpa popup) ==========
+const confBtn = $("confettiBtn");
+if (confBtn) {
+  confBtn.addEventListener("click", () => {
+    // efek sederhana pakai emoji "jatuh" (tanpa canvas, aman)
+    const count = 22;
+    for (let i = 0; i < count; i++) {
+      const s = document.createElement("span");
+      s.textContent = Math.random() > 0.5 ? "✨" : "🎉";
+      s.style.position = "fixed";
+      s.style.left = Math.floor(Math.random() * 100) + "vw";
+      s.style.top = "-10px";
+      s.style.fontSize = (18 + Math.random() * 18) + "px";
+      s.style.zIndex = "9999";
+      s.style.pointerEvents = "none";
+      s.style.transition = "transform 1.2s linear, opacity 1.2s linear";
+      document.body.appendChild(s);
 
-  pieces = pieces.filter(p => p.life > 0);
-  for (const p of pieces) {
-    p.x += p.vx;
-    p.y += p.vy;
-    p.rot += p.vr;
-    p.vy += 0.03 * devicePixelRatio; // gravity
-    p.life -= 1;
+      const drop = (window.innerHeight + 120) + Math.random() * 80;
+      const drift = (Math.random() * 160 - 80);
 
-    ctx.save();
-    ctx.translate(p.x, p.y);
-    ctx.rotate(p.rot);
-    ctx.fillStyle = p.color;
-    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.65);
-    ctx.restore();
-  }
+      requestAnimationFrame(() => {
+        s.style.transform = `translate(${drift}px, ${drop}px) rotate(${Math.random()*360}deg)`;
+        s.style.opacity = "0";
+      });
 
-  requestAnimationFrame(animate);
+      setTimeout(() => s.remove(), 1400);
+    }
+  });
 }
-animate();
-
