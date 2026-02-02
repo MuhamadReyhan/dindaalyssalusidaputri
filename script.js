@@ -2,10 +2,10 @@
 // CONFIG (EDIT DI SINI)
 // =====================
 const CONFIG = {
-  name: "Nama Dia",
+  name: "Dinda Alyssa Lusida Putri",
   subtitle: "Aku bersyukur kamu ada. Semoga tahun ini kamu makin bahagia, sehat, dan dikelilingi hal baik.",
   // Ulang tahun (hari & bulan). Script akan otomatis pilih "ulang tahun berikutnya"
-  birthdayDay: 17,
+  birthdayDay: 20,
   birthdayMonth: 8, // 1=Jan, 2=Feb, ... 12=Des
   secretMessage:
     "Kamu itu spesial. Terima kasih sudah jadi orang yang menginspirasi. Semoga semua impianmu pelan-pelan jadi nyata ✨",
@@ -218,3 +218,4 @@ function animate() {
   requestAnimationFrame(animate);
 }
 animate();
+
